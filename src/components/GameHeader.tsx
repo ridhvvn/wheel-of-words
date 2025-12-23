@@ -11,7 +11,7 @@ export const GameHeader = ({ onNewGame }: GameHeaderProps) => {
       <h1 className="font-display text-3xl sm:text-4xl md:text-5xl tracking-wider">
         <span className="text-primary glow-text">RODA</span>
         <span className="text-foreground"> </span>
-        <span className="text-secondary">LANCVAU</span>
+        <span className="text-secondary">ILMU</span>
       </h1>
       <Button variant="outline" size="sm" onClick={onNewGame} className="gap-2">
         <RotateCcw className="w-4 h-4" />
