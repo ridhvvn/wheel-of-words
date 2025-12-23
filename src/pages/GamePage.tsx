@@ -1,47 +1,55 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { GameHeader } from "@/components/GameHeader";
-import { CategoryCard } from "@/components/CategoryCard";
 import { LetterBoard } from "@/components/LetterBoard";
-import { ScoreBoard } from "@/components/ScoreBoard";
-import { ClueLetters } from "@/components/ClueLetters";
 import { Keyboard } from "@/components/Keyboard";
-import { GameStatus } from "@/components/GameStatus";
 import { useGameStore } from "@/stores/gameStore";
-import { Button } from "@/components/ui/button";
-import { RotateCcw } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Clock, Trophy } from "lucide-react";
 
 const GamePage = () => {
   const navigate = useNavigate();
   const {
-    currentPuzzle,
+    questions,
+    currentQuestionIndex,
     revealedLetters,
     usedLetters,
     score,
-    wrongGuesses,
-    maxWrongGuesses,
-    gameStatus,
-    newlyRevealedLetter,
-    clueLetters,
-    cluesRemaining,
-    currentSpinValue,
-    hasSpun,
+    gamePhase,
     guessLetter,
-    useClue,
-    startNewGame,
+    tickTimer,
+    timerRemaining,
+    isTimerRunning,
+    resetGame
   } = useGameStore();
 
-  // Redirect to spin page if no spin value
+  // Timer effect handled in GameLayout
+
+  // Navigation effect
   useEffect(() => {
-    if (!hasSpun && gameStatus === "playing") {
+    if (gamePhase === "spin") {
+      navigate("/spin");
+    } else if (gamePhase === "setup") {
       navigate("/");
     }
-  }, [hasSpun, gameStatus, navigate]);
+    // Result navigation handled in GameLayout
+  }, [gamePhase, navigate]);
+
+  // Safety check
+  const currentQuestion = questions.find((_, i) => i === currentQuestionIndex);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
 
   const handleNewGame = () => {
-    startNewGame();
+    resetGame();
     navigate("/");
   };
+
+  if (!currentQuestion && gamePhase === "play") return null;
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
@@ -56,74 +64,48 @@ const GamePage = () => {
         <GameHeader onNewGame={handleNewGame} />
 
         <main className="flex-1 flex flex-col items-center justify-center gap-6 sm:gap-8 p-4">
-          {/* Spin Value Display */}
-          {currentSpinValue !== null && currentSpinValue > 0 && (
-            <div className="bg-primary/20 border border-primary rounded-xl px-6 py-3 animate-fade-in">
-              <p className="text-xl font-bold text-primary">
-                ${currentSpinValue} per letter!
-              </p>
-            </div>
-          )}
+          
+          {/* Info Bar */}
+          <div className="flex gap-4 w-full max-w-4xl justify-between items-center">
+             <Card className="p-4 flex items-center gap-3 bg-card/50 backdrop-blur">
+                <Clock className="w-6 h-6 text-primary" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Masa</p>
+                  <p className="text-xl font-bold font-mono">{formatTime(timerRemaining)}</p>
+                </div>
+             </Card>
 
-          {/* Category */}
-          <CategoryCard category={currentPuzzle.category} />
+             <Card className="p-4 flex items-center gap-3 bg-card/50 backdrop-blur">
+                <Trophy className="w-6 h-6 text-yellow-500" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Markah</p>
+                  <p className="text-xl font-bold">{score}</p>
+                </div>
+             </Card>
+          </div>
+
+          {/* Category/Tahap */}
+          <div className="bg-secondary/20 px-6 py-2 rounded-full">
+            <p className="text-sm font-medium text-secondary-foreground uppercase tracking-wider">
+              Tahap: {currentQuestion?.tahap || "Unknown"} | Markah: {currentQuestion?.markah || 0}
+            </p>
+          </div>
 
           {/* Letter Board */}
           <div className="w-full max-w-4xl bg-card/30 backdrop-blur border border-border rounded-2xl p-4 sm:p-6">
             <LetterBoard
-              phrase={currentPuzzle.phrase}
+              phrase={currentQuestion?.peribahasa || ""}
               revealedLetters={revealedLetters}
-              newlyRevealedLetter={newlyRevealedLetter}
+              newlyRevealedLetter={null}
             />
           </div>
-
-          {/* Score and Lives */}
-          <ScoreBoard
-            score={score}
-            wrongGuesses={wrongGuesses}
-            maxWrongGuesses={maxWrongGuesses}
-          />
-
-          {/* Clue Letters */}
-          <ClueLetters
-            clueLetters={clueLetters}
-            onUseClue={useClue}
-            cluesRemaining={cluesRemaining}
-            disabled={gameStatus !== "playing"}
-          />
 
           {/* Keyboard */}
           <Keyboard
             usedLetters={usedLetters}
-            onLetterClick={(letter) => {
-              guessLetter(letter);
-              // After guessing, go back to spin
-              setTimeout(() => {
-                if (gameStatus === "playing") {
-                  navigate("/");
-                }
-              }, 600);
-            }}
-            disabled={gameStatus !== "playing" || !hasSpun}
+            onLetterClick={guessLetter}
           />
-
-          {/* Spin Again Button */}
-          <Button
-            variant="outline"
-            onClick={() => navigate("/")}
-            className="gap-2"
-          >
-            <RotateCcw className="w-4 h-4" />
-            Spin Again
-          </Button>
         </main>
-
-        {/* Game Over Modal */}
-        <GameStatus
-          status={gameStatus}
-          phrase={currentPuzzle.phrase}
-          onNewGame={handleNewGame}
-        />
       </div>
     </div>
   );

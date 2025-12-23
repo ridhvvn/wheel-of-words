@@ -1,31 +1,25 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
+export interface WheelSegment {
+  id: any;
+  label: string;
+  color: string;
+}
+
 interface SpinningWheelProps {
-  onSpinComplete: (value: number) => void;
+  segments: WheelSegment[];
+  onSpinComplete: (segmentId: any) => void;
   disabled?: boolean;
 }
 
-const SEGMENTS = [
-  { value: 100, color: "#efabff" },
-  { value: 200, color: "#eda2f2" },
-  { value: 300, color: "#dc6bad" },
-  { value: 400, color: "#8c7aa9" },
-  { value: 500, color: "#7192be" },
-  { value: 600, color: "#efabff" },
-  { value: 800, color: "#eda2f2" },
-  { value: 1000, color: "#dc6bad" },
-  { value: 0, color: "#8c7aa9", label: "BANKRUPT" },
-  { value: 250, color: "#7192be" },
-  { value: 350, color: "#efabff" },
-  { value: 750, color: "#eda2f2" },
-];
-
-const SpinningWheel = ({ onSpinComplete, disabled }: SpinningWheelProps) => {
+const SpinningWheel = ({ segments, onSpinComplete, disabled }: SpinningWheelProps) => {
   const [rotation, setRotation] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
 
-  const segmentAngle = 360 / SEGMENTS.length;
+  // Ensure we have segments
+  const safeSegments = segments.length > 0 ? segments : [{ id: 0, label: "?", color: "#ccc" }];
+  const segmentAngle = 360 / safeSegments.length;
 
   const spin = useCallback(() => {
     if (isSpinning || disabled) return;
@@ -34,22 +28,52 @@ const SpinningWheel = ({ onSpinComplete, disabled }: SpinningWheelProps) => {
     
     // Random number of full rotations (3-6) plus random segment
     const fullRotations = 3 + Math.floor(Math.random() * 4);
-    const randomSegment = Math.floor(Math.random() * SEGMENTS.length);
-    const segmentRotation = randomSegment * segmentAngle;
-    const newRotation = rotation + (fullRotations * 360) + segmentRotation;
+    const randomSegmentIndex = Math.floor(Math.random() * safeSegments.length);
+    
+    // Calculate target rotation to land on the random segment
+    // The pointer is at the top (270 degrees or -90 degrees in SVG space, but let's stick to standard rotation)
+    // If we rotate the wheel, the segment at the top changes.
+    // To land on segment i, we need the wheel to be rotated such that segment i is at the top.
+    // Segment i spans from (i * angle) to ((i+1) * angle). Center is (i + 0.5) * angle.
+    // We want (i + 0.5) * angle to be at -90deg (top).
+    // So Rotation + (i + 0.5) * angle = -90 (mod 360)
+    // Rotation = -90 - (i + 0.5) * angle
+    // But we are adding to current rotation.
+    
+    // Simpler approach:
+    // Just rotate by a random amount, then calculate what is at the top.
+    const segmentRotation = randomSegmentIndex * segmentAngle;
+    // Add some randomness within the segment to avoid landing on lines
+    const randomOffset = (Math.random() - 0.5) * (segmentAngle * 0.8);
+    
+    const newRotation = rotation + (fullRotations * 360) + segmentRotation + randomOffset;
     
     setRotation(newRotation);
 
-    // Calculate which segment we land on (accounting for pointer at top)
     setTimeout(() => {
-      const normalizedRotation = newRotation % 360;
-      const landedIndex = Math.floor((360 - normalizedRotation + segmentAngle / 2) / segmentAngle) % SEGMENTS.length;
-      const landedValue = SEGMENTS[landedIndex].value;
-      
       setIsSpinning(false);
-      onSpinComplete(landedValue);
+      
+      // Calculate landed segment
+      // Normalize rotation to 0-360
+      const normalizedRotation = newRotation % 360;
+      // The pointer is at the top (0 degrees visually, but let's say 270 in standard circle math, or -90).
+      // In the SVG, 0 degrees is 3 o'clock. Top is 270 degrees (or -90).
+      // If we rotate the group by R degrees, the point at angle A becomes A + R.
+      // We want to find which segment's angle range [start, end] contains the pointer angle.
+      // Pointer angle relative to the wheel is: (Pointer - Rotation) % 360.
+      // Pointer is at -90 (top).
+      // So relative angle = (-90 - normalizedRotation) % 360.
+      // Let's make it positive.
+      let relativeAngle = (-90 - normalizedRotation) % 360;
+      if (relativeAngle < 0) relativeAngle += 360;
+      
+      const landedIndex = Math.floor(relativeAngle / segmentAngle);
+      // Clamp just in case
+      const finalIndex = Math.min(Math.max(landedIndex, 0), safeSegments.length - 1);
+      
+      onSpinComplete(safeSegments[finalIndex].id);
     }, 4000);
-  }, [isSpinning, disabled, rotation, segmentAngle, onSpinComplete]);
+  }, [isSpinning, disabled, rotation, segmentAngle, onSpinComplete, safeSegments]);
 
   return (
     <div className="flex flex-col items-center gap-4">
@@ -76,9 +100,13 @@ const SpinningWheel = ({ onSpinComplete, disabled }: SpinningWheelProps) => {
           {/* Outer ring */}
           <circle cx="170" cy="170" r="165" fill="none" stroke="hsl(var(--foreground))" strokeWidth="6" />
           
-          {SEGMENTS.map((segment, index) => {
-            const startAngle = index * segmentAngle - 90;
+          {safeSegments.map((segment, index) => {
+            const startAngle = index * segmentAngle;
             const endAngle = startAngle + segmentAngle;
+            
+            // SVG arc path
+            // 0 degrees is 3 o'clock.
+            // We want to start drawing from startAngle.
             
             const startRad = (startAngle * Math.PI) / 180;
             const endRad = (endAngle * Math.PI) / 180;
@@ -96,10 +124,11 @@ const SpinningWheel = ({ onSpinComplete, disabled }: SpinningWheelProps) => {
             const midAngle = ((startAngle + endAngle) / 2 * Math.PI) / 180;
             const textX = 170 + 100 * Math.cos(midAngle);
             const textY = 170 + 100 * Math.sin(midAngle);
-            const textRotation = (startAngle + endAngle) / 2 + 90;
+            const textRotation = (startAngle + endAngle) / 2 + 90; // Rotate text to be readable
             
-            // Determine text color based on background brightness
-            const isDarkBg = segment.color === "#dc6bad" || segment.color === "#8c7aa9" || segment.color === "#7192be";
+            // Determine text color based on background brightness (simple heuristic)
+            // Assuming hex colors
+            const isDarkBg = ["#dc6bad", "#8c7aa9", "#7192be", "#000000", "#333333"].includes(segment.color.toLowerCase());
             
             return (
               <g key={index}>
@@ -108,14 +137,14 @@ const SpinningWheel = ({ onSpinComplete, disabled }: SpinningWheelProps) => {
                   x={textX}
                   y={textY}
                   fill={isDarkBg ? "white" : "#1a1a1a"}
-                  fontSize={segment.label ? "11" : "14"}
+                  fontSize={safeSegments.length > 20 ? "10" : "14"}
                   fontWeight="bold"
                   textAnchor="middle"
                   dominantBaseline="middle"
                   transform={`rotate(${textRotation}, ${textX}, ${textY})`}
                   style={{ textShadow: isDarkBg ? "1px 1px 2px rgba(0,0,0,0.5)" : "none" }}
                 >
-                  {segment.label || `$${segment.value}`}
+                  {segment.label}
                 </text>
               </g>
             );
@@ -132,7 +161,7 @@ const SpinningWheel = ({ onSpinComplete, disabled }: SpinningWheelProps) => {
         disabled={isSpinning || disabled}
         className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 py-3 text-lg rounded-full shadow-lg transition-transform hover:scale-105 disabled:opacity-50"
       >
-        {isSpinning ? "SPINNING..." : "SPIN!"}
+        {isSpinning ? "PUSING..." : "PUSING!"}
       </Button>
     </div>
   );
