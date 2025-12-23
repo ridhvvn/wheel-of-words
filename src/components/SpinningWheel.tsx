@@ -7,18 +7,18 @@ interface SpinningWheelProps {
 }
 
 const SEGMENTS = [
-  { value: 100, color: "hsl(var(--primary))" },
-  { value: 200, color: "hsl(var(--secondary))" },
-  { value: 300, color: "hsl(var(--accent))" },
-  { value: 400, color: "hsl(var(--success))" },
-  { value: 500, color: "hsl(var(--primary))" },
-  { value: 600, color: "hsl(var(--secondary))" },
-  { value: 800, color: "hsl(var(--accent))" },
-  { value: 1000, color: "hsl(var(--success))" },
-  { value: 0, color: "hsl(var(--destructive))", label: "BANKRUPT" },
-  { value: 250, color: "hsl(var(--primary))" },
-  { value: 350, color: "hsl(var(--secondary))" },
-  { value: 750, color: "hsl(var(--accent))" },
+  { value: 100, color: "#FCF8E8" },
+  { value: 200, color: "#ECDFC8" },
+  { value: 300, color: "#ECB390" },
+  { value: 400, color: "#DF7861" },
+  { value: 500, color: "#FF370F" },
+  { value: 600, color: "#FCF8E8" },
+  { value: 800, color: "#ECDFC8" },
+  { value: 1000, color: "#ECB390" },
+  { value: 0, color: "#FF370F", label: "BANKRUPT" },
+  { value: 250, color: "#DF7861" },
+  { value: 350, color: "#FCF8E8" },
+  { value: 750, color: "#ECDFC8" },
 ];
 
 const SpinningWheel = ({ onSpinComplete, disabled }: SpinningWheelProps) => {
@@ -55,26 +55,26 @@ const SpinningWheel = ({ onSpinComplete, disabled }: SpinningWheelProps) => {
     <div className="flex flex-col items-center gap-4">
       <div className="relative">
         {/* Pointer */}
-        <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-10">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
           <div 
-            className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[20px] border-l-transparent border-r-transparent border-t-foreground"
-            style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))" }}
+            className="w-0 h-0 border-l-[16px] border-r-[16px] border-t-[28px] border-l-transparent border-r-transparent border-t-foreground"
+            style={{ filter: "drop-shadow(0 3px 6px rgba(0,0,0,0.4))" }}
           />
         </div>
         
         {/* Wheel */}
         <svg 
-          width="220" 
-          height="220" 
-          viewBox="0 0 220 220"
-          className="drop-shadow-lg"
+          width="340" 
+          height="340" 
+          viewBox="0 0 340 340"
+          className="drop-shadow-xl"
           style={{
             transform: `rotate(${rotation}deg)`,
             transition: isSpinning ? "transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)" : "none",
           }}
         >
           {/* Outer ring */}
-          <circle cx="110" cy="110" r="108" fill="none" stroke="hsl(var(--foreground))" strokeWidth="4" />
+          <circle cx="170" cy="170" r="165" fill="none" stroke="hsl(var(--foreground))" strokeWidth="6" />
           
           {SEGMENTS.map((segment, index) => {
             const startAngle = index * segmentAngle - 90;
@@ -83,34 +83,37 @@ const SpinningWheel = ({ onSpinComplete, disabled }: SpinningWheelProps) => {
             const startRad = (startAngle * Math.PI) / 180;
             const endRad = (endAngle * Math.PI) / 180;
             
-            const x1 = 110 + 100 * Math.cos(startRad);
-            const y1 = 110 + 100 * Math.sin(startRad);
-            const x2 = 110 + 100 * Math.cos(endRad);
-            const y2 = 110 + 100 * Math.sin(endRad);
+            const x1 = 170 + 160 * Math.cos(startRad);
+            const y1 = 170 + 160 * Math.sin(startRad);
+            const x2 = 170 + 160 * Math.cos(endRad);
+            const y2 = 170 + 160 * Math.sin(endRad);
             
             const largeArc = segmentAngle > 180 ? 1 : 0;
             
-            const pathD = `M 110 110 L ${x1} ${y1} A 100 100 0 ${largeArc} 1 ${x2} ${y2} Z`;
+            const pathD = `M 170 170 L ${x1} ${y1} A 160 160 0 ${largeArc} 1 ${x2} ${y2} Z`;
             
             // Text position
             const midAngle = ((startAngle + endAngle) / 2 * Math.PI) / 180;
-            const textX = 110 + 65 * Math.cos(midAngle);
-            const textY = 110 + 65 * Math.sin(midAngle);
+            const textX = 170 + 100 * Math.cos(midAngle);
+            const textY = 170 + 100 * Math.sin(midAngle);
             const textRotation = (startAngle + endAngle) / 2 + 90;
+            
+            // Determine text color based on background brightness
+            const isDarkBg = segment.color === "#FF370F" || segment.color === "#DF7861";
             
             return (
               <g key={index}>
-                <path d={pathD} fill={segment.color} stroke="hsl(var(--background))" strokeWidth="1" />
+                <path d={pathD} fill={segment.color} stroke="hsl(var(--background))" strokeWidth="2" />
                 <text
                   x={textX}
                   y={textY}
-                  fill="white"
-                  fontSize={segment.label ? "8" : "11"}
+                  fill={isDarkBg ? "white" : "#1a1a1a"}
+                  fontSize={segment.label ? "11" : "14"}
                   fontWeight="bold"
                   textAnchor="middle"
                   dominantBaseline="middle"
                   transform={`rotate(${textRotation}, ${textX}, ${textY})`}
-                  style={{ textShadow: "1px 1px 2px rgba(0,0,0,0.5)" }}
+                  style={{ textShadow: isDarkBg ? "1px 1px 2px rgba(0,0,0,0.5)" : "none" }}
                 >
                   {segment.label || `$${segment.value}`}
                 </text>
@@ -119,8 +122,8 @@ const SpinningWheel = ({ onSpinComplete, disabled }: SpinningWheelProps) => {
           })}
           
           {/* Center circle */}
-          <circle cx="110" cy="110" r="15" fill="hsl(var(--foreground))" />
-          <circle cx="110" cy="110" r="10" fill="hsl(var(--background))" />
+          <circle cx="170" cy="170" r="22" fill="hsl(var(--foreground))" />
+          <circle cx="170" cy="170" r="15" fill="hsl(var(--background))" />
         </svg>
       </div>
       
