@@ -14,9 +14,9 @@ const KEYBOARD_ROWS = [
 
 export const Keyboard = ({ usedLetters, onLetterClick, disabled }: KeyboardProps) => {
   return (
-    <div className="flex flex-col items-center gap-2 p-4">
+    <div className="flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-4 w-full max-w-3xl">
       {KEYBOARD_ROWS.map((row, rowIndex) => (
-        <div key={rowIndex} className="flex gap-1 sm:gap-2">
+        <div key={rowIndex} className="flex gap-0.5 sm:gap-2 justify-center w-full">
           {row.map((letter) => {
             const isUsed = usedLetters.has(letter);
             return (

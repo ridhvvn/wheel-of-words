@@ -4,6 +4,7 @@ export interface Question {
   peribahasa: string;
   tahap: string;
   markah: number;
+  contoh: string;
 }
 
 export const fetchQuestions = async (): Promise<Question[]> => {
@@ -26,7 +27,8 @@ export const fetchQuestions = async (): Promise<Question[]> => {
           id: i,
           peribahasa: values[0].trim(),
           tahap: values[1].trim(),
-          markah: parseInt(values[2].trim()) || 0
+          markah: parseInt(values[2].trim()) || 0,
+          contoh: values[3] ? values[3].trim() : ""
         });
       }
     }

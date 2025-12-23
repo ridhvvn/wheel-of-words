@@ -5,7 +5,8 @@ import { LetterBoard } from "@/components/LetterBoard";
 import { Keyboard } from "@/components/Keyboard";
 import { useGameStore } from "@/stores/gameStore";
 import { Card } from "@/components/ui/card";
-import { Clock, Trophy } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Clock, Trophy, Lightbulb } from "lucide-react";
 
 const GamePage = () => {
   const navigate = useNavigate();
@@ -20,7 +21,9 @@ const GamePage = () => {
     tickTimer,
     timerRemaining,
     isTimerRunning,
-    resetGame
+    resetGame,
+    buyClue,
+    cluePurchased
   } = useGameStore();
 
   // Timer effect handled in GameLayout
@@ -63,32 +66,55 @@ const GamePage = () => {
       <div className="relative z-10 flex flex-col min-h-screen">
         <GameHeader onNewGame={handleNewGame} />
 
-        <main className="flex-1 flex flex-col items-center justify-center gap-6 sm:gap-8 p-4">
+        <main className="flex-1 flex flex-col items-center justify-center gap-4 sm:gap-8 p-2 sm:p-4">
           
           {/* Info Bar */}
-          <div className="flex gap-4 w-full max-w-4xl justify-between items-center">
-             <Card className="p-4 flex items-center gap-3 bg-card/50 backdrop-blur">
-                <Clock className="w-6 h-6 text-primary" />
+          <div className="flex gap-2 sm:gap-4 w-full max-w-4xl justify-between items-center">
+             <Card className="flex-1 p-2 sm:p-4 flex items-center justify-center sm:justify-start gap-2 sm:gap-3 bg-card/50 backdrop-blur">
+                <Clock className="w-4 h-4 sm:w-6 sm:h-6 text-primary" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Masa</p>
-                  <p className="text-xl font-bold font-mono">{formatTime(timerRemaining)}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Masa</p>
+                  <p className="text-sm sm:text-xl font-bold font-mono">{formatTime(timerRemaining)}</p>
                 </div>
              </Card>
 
-             <Card className="p-4 flex items-center gap-3 bg-card/50 backdrop-blur">
-                <Trophy className="w-6 h-6 text-yellow-500" />
+             <Card className="flex-1 p-2 sm:p-4 flex items-center justify-center sm:justify-start gap-2 sm:gap-3 bg-card/50 backdrop-blur">
+                <Trophy className="w-4 h-4 sm:w-6 sm:h-6 text-yellow-500" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Markah</p>
-                  <p className="text-xl font-bold">{score}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Markah</p>
+                  <p className="text-sm sm:text-xl font-bold">{score}</p>
                 </div>
              </Card>
           </div>
 
           {/* Category/Tahap */}
-          <div className="bg-secondary/20 px-6 py-2 rounded-full">
-            <p className="text-sm font-medium text-secondary-foreground uppercase tracking-wider">
+          <div className="bg-secondary/20 px-4 py-1 sm:px-6 sm:py-2 rounded-full text-center">
+            <p className="text-xs sm:text-sm font-medium text-secondary-foreground uppercase tracking-wider">
               Tahap: {currentQuestion?.tahap || "Unknown"} | Markah: {currentQuestion?.markah || 0}
             </p>
+          </div>
+
+          {/* Clue Section */}
+          <div className="flex flex-col items-center gap-2 min-h-[3rem]">
+             {cluePurchased ? (
+                <div className="bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 px-4 py-2 rounded-lg animate-in fade-in slide-in-from-top-2">
+                   <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                      <span className="font-bold mr-2">💡 Clue:</span>
+                      {currentQuestion?.contoh || "Tiada clue"}
+                   </p>
+                </div>
+             ) : (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={buyClue}
+                  disabled={score < 1}
+                  className="gap-2"
+                >
+                  <Lightbulb className="w-4 h-4" />
+                  Beli Clue (1 Markah)
+                </Button>
+             )}
           </div>
 
           {/* Letter Board */}

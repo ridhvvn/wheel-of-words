@@ -17,6 +17,8 @@ interface GameState {
   revealedLetters: Set<string>;
   usedLetters: Set<string>;
   wrongGuesses: number; // For current question
+  cluePurchased: boolean;
+  isMusicMuted: boolean;
   
   // Actions
   setPlayerName: (name: string) => void;
@@ -25,11 +27,13 @@ interface GameState {
   startGame: () => void;
   spinWheel: () => void;
   selectQuestion: (index: number) => void;
+  buyClue: () => void;
   completeCurrentQuestion: () => void;
   guessLetter: (letter: string) => void;
   tickTimer: () => void;
   resetGame: () => void;
   nextQuestion: () => void;
+  toggleMusic: () => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -46,6 +50,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   revealedLetters: new Set<string>(),
   usedLetters: new Set<string>(),
   wrongGuesses: 0,
+  cluePurchased: false,
+  isMusicMuted: false,
 
   setPlayerName: (name) => set({ playerName: name }),
   
@@ -58,6 +64,11 @@ export const useGameStore = create<GameState>((set, get) => ({
   
   startGame: () => {
     const state = get();
+    // Start music if not muted
+    if (!state.isMusicMuted) {
+      soundManager.startMusic();
+    }
+
     // We don't shuffle anymore, we keep the order from CSV to match IDs if needed, 
     // or we can shuffle but we rely on the wheel to pick.
     // Let's keep them as is so the wheel segments are consistent with IDs if we want.
@@ -76,7 +87,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       isTimerRunning: false,
       revealedLetters: new Set<string>(),
       usedLetters: new Set<string>(),
-      wrongGuesses: 0
+      wrongGuesses: 0,
+      cluePurchased: false
     });
   },
   
@@ -92,8 +104,31 @@ export const useGameStore = create<GameState>((set, get) => ({
       isTimerRunning: true,
       revealedLetters: new Set<string>(),
       usedLetters: new Set<string>(),
-      wrongGuesses: 0
+      wrongGuesses: 0,
+      cluePurchased: false
     });
+  },
+
+  buyClue: () => {
+    const state = get();
+    if (state.cluePurchased) return;
+    // Allow buying even if score is low? Or require score >= 1?
+    // "each clues cost 1 marks"
+    // Let's assume we can go into debt or must have 1.
+    // I'll enforce score >= 1 for now to be safe.
+    if (state.score >= 1) {
+      set({
+        score: state.score - 1,
+        cluePurchased: true
+      });
+    }
+  },
+
+  toggleMusic: () => {
+    const state = get();
+    const newMuted = !state.isMusicMuted;
+    soundManager.toggleMusic(!newMuted);
+    set({ isMusicMuted: newMuted });
   },
   
   guessLetter: (letter: string) => {
@@ -140,6 +175,7 @@ export const useGameStore = create<GameState>((set, get) => ({
            state.completeCurrentQuestion();
         }, 1500);
       } else {
+        soundManager.playReveal();
         set({
           revealedLetters: newRevealed,
           usedLetters: newUsedLetters,

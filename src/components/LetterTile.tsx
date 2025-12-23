@@ -22,7 +22,7 @@ export const LetterTile = ({ letter, isRevealed, isSpace, isNewlyRevealed }: Let
     >
       <span
         className={cn(
-          "font-display text-2xl sm:text-3xl md:text-4xl tracking-wider",
+          "font-display tracking-wider",
           isRevealed ? "text-primary-foreground" : "text-transparent"
         )}
       >

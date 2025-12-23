@@ -92,7 +92,7 @@
 @layer components {
   .letter-tile {
     @apply relative flex items-center justify-center;
-    @apply w-12 h-14 sm:w-16 sm:h-20 md:w-20 md:h-24;
+    @apply w-8 h-10 text-lg sm:w-12 sm:h-14 sm:text-2xl md:w-16 md:h-20 md:text-3xl lg:w-20 lg:h-24 lg:text-4xl;
     @apply rounded-lg border-2 border-border;
     @apply transition-all duration-300;
     background: var(--gradient-tile);
