@@ -5,6 +5,7 @@ import { ScoreBoard } from "@/components/ScoreBoard";
 import { ClueLetters } from "@/components/ClueLetters";
 import { Keyboard } from "@/components/Keyboard";
 import { GameStatus } from "@/components/GameStatus";
+import SpinningWheel from "@/components/SpinningWheel";
 import { useWheelOfFortune } from "@/hooks/useWheelOfFortune";
 
 const Index = () => {
@@ -19,9 +20,12 @@ const Index = () => {
     newlyRevealedLetter,
     clueLetters,
     cluesRemaining,
+    currentSpinValue,
+    hasSpun,
     guessLetter,
     useClue,
     startNewGame,
+    handleSpinComplete,
   } = useWheelOfFortune();
 
   return (
@@ -36,40 +40,71 @@ const Index = () => {
       <div className="relative z-10 flex flex-col min-h-screen">
         <GameHeader onNewGame={startNewGame} />
 
-        <main className="flex-1 flex flex-col items-center justify-center gap-6 sm:gap-8 p-4">
-          {/* Category */}
-          <CategoryCard category={currentPuzzle.category} />
-
-          {/* Letter Board */}
-          <div className="w-full max-w-4xl bg-card/30 backdrop-blur border border-border rounded-2xl p-4 sm:p-6">
-            <LetterBoard
-              phrase={currentPuzzle.phrase}
-              revealedLetters={revealedLetters}
-              newlyRevealedLetter={newlyRevealedLetter}
+        <main className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-6 sm:gap-8 p-4">
+          {/* Left side - Spinning Wheel */}
+          <div className="flex flex-col items-center gap-4">
+            <SpinningWheel 
+              onSpinComplete={handleSpinComplete} 
+              disabled={gameStatus !== "playing" || hasSpun}
             />
+            {hasSpun && currentSpinValue !== null && currentSpinValue > 0 && (
+              <div className="text-center animate-fade-in">
+                <p className="text-lg font-bold text-primary">
+                  ${currentSpinValue} per letter!
+                </p>
+                <p className="text-sm text-muted-foreground">Pick a letter</p>
+              </div>
+            )}
+            {hasSpun && currentSpinValue === 0 && (
+              <div className="text-center animate-fade-in">
+                <p className="text-lg font-bold text-destructive">BANKRUPT!</p>
+                <p className="text-sm text-muted-foreground">Spin again</p>
+              </div>
+            )}
           </div>
 
-          {/* Score and Lives */}
-          <ScoreBoard
-            score={score}
-            wrongGuesses={wrongGuesses}
-            maxWrongGuesses={maxWrongGuesses}
-          />
+          {/* Right side - Game Board */}
+          <div className="flex flex-col items-center gap-6">
+            {/* Category */}
+            <CategoryCard category={currentPuzzle.category} />
 
-          {/* Clue Letters */}
-          <ClueLetters
-            clueLetters={clueLetters}
-            onUseClue={useClue}
-            cluesRemaining={cluesRemaining}
-            disabled={gameStatus !== "playing"}
-          />
+            {/* Letter Board */}
+            <div className="w-full max-w-4xl bg-card/30 backdrop-blur border border-border rounded-2xl p-4 sm:p-6">
+              <LetterBoard
+                phrase={currentPuzzle.phrase}
+                revealedLetters={revealedLetters}
+                newlyRevealedLetter={newlyRevealedLetter}
+              />
+            </div>
 
-          {/* Keyboard */}
-          <Keyboard
-            usedLetters={usedLetters}
-            onLetterClick={guessLetter}
-            disabled={gameStatus !== "playing"}
-          />
+            {/* Score and Lives */}
+            <ScoreBoard
+              score={score}
+              wrongGuesses={wrongGuesses}
+              maxWrongGuesses={maxWrongGuesses}
+            />
+
+            {/* Clue Letters */}
+            <ClueLetters
+              clueLetters={clueLetters}
+              onUseClue={useClue}
+              cluesRemaining={cluesRemaining}
+              disabled={gameStatus !== "playing"}
+            />
+
+            {/* Keyboard */}
+            <Keyboard
+              usedLetters={usedLetters}
+              onLetterClick={guessLetter}
+              disabled={gameStatus !== "playing" || !hasSpun}
+            />
+            
+            {!hasSpun && gameStatus === "playing" && (
+              <p className="text-sm text-muted-foreground animate-pulse">
+                Spin the wheel first!
+              </p>
+            )}
+          </div>
         </main>
 
         {/* Game Over Modal */}
