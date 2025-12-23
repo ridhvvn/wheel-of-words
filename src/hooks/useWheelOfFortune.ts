@@ -32,7 +32,8 @@ export const useWheelOfFortune = () => {
   const [newlyRevealedLetter, setNewlyRevealedLetter] = useState<string | null>(null);
   const [clueLetters, setClueLetters] = useState<string[]>([]);
   const [cluesRemaining, setCluesRemaining] = useState(MAX_CLUES);
-
+  const [currentSpinValue, setCurrentSpinValue] = useState<number | null>(null);
+  const [hasSpun, setHasSpun] = useState(false);
   const getRandomPuzzle = useCallback(() => {
     const randomIndex = Math.floor(Math.random() * PUZZLES.length);
     return PUZZLES[randomIndex];
@@ -53,9 +54,20 @@ export const useWheelOfFortune = () => {
     [currentPuzzle.phrase]
   );
 
+  const handleSpinComplete = useCallback((value: number) => {
+    setCurrentSpinValue(value);
+    setHasSpun(true);
+    
+    if (value === 0) {
+      // Bankrupt - lose all points
+      setScore(0);
+      setHasSpun(false);
+    }
+  }, []);
+
   const guessLetter = useCallback(
     (letter: string) => {
-      if (gameStatus !== "playing" || usedLetters.has(letter)) return;
+      if (gameStatus !== "playing" || usedLetters.has(letter) || !hasSpun || currentSpinValue === null) return;
 
       const upperLetter = letter.toUpperCase();
       setUsedLetters((prev) => new Set([...prev, upperLetter]));
@@ -65,14 +77,12 @@ export const useWheelOfFortune = () => {
       setTimeout(() => setNewlyRevealedLetter(null), 500);
 
       if (currentPuzzle.phrase.toUpperCase().includes(upperLetter)) {
-        // Correct guess
+        // Correct guess - use spin value
         const occurrences = currentPuzzle.phrase
           .toUpperCase()
           .split("")
           .filter((l) => l === upperLetter).length;
-        const randomValue =
-          CONSONANT_VALUES[Math.floor(Math.random() * CONSONANT_VALUES.length)];
-        setScore((prev) => prev + randomValue * occurrences);
+        setScore((prev) => prev + currentSpinValue * occurrences);
 
         const newRevealed = new Set([...revealedLetters, upperLetter]);
         setRevealedLetters(newRevealed);
@@ -89,6 +99,10 @@ export const useWheelOfFortune = () => {
           setGameStatus("lost");
         }
       }
+      
+      // Reset spin state after guess
+      setHasSpun(false);
+      setCurrentSpinValue(null);
     },
     [
       currentPuzzle.phrase,
@@ -97,6 +111,8 @@ export const useWheelOfFortune = () => {
       revealedLetters,
       wrongGuesses,
       checkWinCondition,
+      hasSpun,
+      currentSpinValue,
     ]
   );
 
@@ -133,6 +149,8 @@ export const useWheelOfFortune = () => {
     setNewlyRevealedLetter(null);
     setClueLetters([]);
     setCluesRemaining(MAX_CLUES);
+    setCurrentSpinValue(null);
+    setHasSpun(false);
   }, [getRandomPuzzle]);
 
   // Initialize with a random puzzle
@@ -151,8 +169,11 @@ export const useWheelOfFortune = () => {
     newlyRevealedLetter,
     clueLetters,
     cluesRemaining,
+    currentSpinValue,
+    hasSpun,
     guessLetter,
     useClue,
     startNewGame,
+    handleSpinComplete,
   };
 };
