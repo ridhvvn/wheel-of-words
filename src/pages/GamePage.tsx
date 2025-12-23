@@ -7,6 +7,12 @@ import { useGameStore } from "@/stores/gameStore";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Clock, Trophy, Lightbulb } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const GamePage = () => {
   const navigate = useNavigate();
@@ -22,8 +28,6 @@ const GamePage = () => {
     timerRemaining,
     isTimerRunning,
     resetGame,
-    buyClue,
-    cluePurchased
   } = useGameStore();
 
   // Timer effect handled in GameLayout
@@ -95,26 +99,17 @@ const GamePage = () => {
           </div>
 
           {/* Clue Section */}
-          <div className="flex flex-col items-center gap-2 min-h-[3rem]">
-             {cluePurchased ? (
-                <div className="bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 px-4 py-2 rounded-lg animate-in fade-in slide-in-from-top-2">
-                   <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                      <span className="font-bold mr-2">💡 Clue:</span>
-                      {currentQuestion?.contoh || "Tiada clue"}
-                   </p>
-                </div>
-             ) : (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={buyClue}
-                  disabled={score < 1}
-                  className="gap-2"
-                >
-                  <Lightbulb className="w-4 h-4" />
-                  Beli Clue (1 Markah)
-                </Button>
-             )}
+          <div className="flex flex-col items-center gap-2 w-full max-w-md">
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="clue" className="border-none bg-card/30 backdrop-blur rounded-lg px-4">
+                <AccordionTrigger className="py-2 text-sm hover:no-underline justify-center gap-2 text-muted-foreground hover:text-foreground">
+                   <span className="flex items-center gap-2"><Lightbulb className="w-4 h-4 text-yellow-500" /> Lihat Klu (Contoh)</span>
+                </AccordionTrigger>
+                <AccordionContent className="text-center font-medium text-foreground pb-3">
+                  {currentQuestion?.contoh || "Tiada klu tersedia"}
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
 
           {/* Letter Board */}
