@@ -6,25 +6,25 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    --background: 290 100% 98%;
+    --foreground: 260 30% 20%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card: 290 100% 99%;
+    --card-foreground: 260 30% 20%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover: 290 100% 99%;
+    --popover-foreground: 260 30% 20%;
 
-    --primary: 25 95% 53%;
+    --primary: 330 60% 64%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 100% 50%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 295 78% 79%;
+    --secondary-foreground: 260 30% 20%;
 
-    --muted: 210 40% 93%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 290 40% 92%;
+    --muted-foreground: 260 20% 45%;
 
-    --accent: 280 85% 55%;
+    --accent: 213 36% 60%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -33,28 +33,35 @@
     --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
 
-    --border: 214 32% 85%;
-    --input: 214 32% 85%;
-    --ring: 25 95% 53%;
+    --border: 290 30% 85%;
+    --input: 290 30% 85%;
+    --ring: 330 60% 64%;
 
     --radius: 0.75rem;
 
     /* Custom game tokens */
-    --tile-bg: 210 40% 96%;
-    --tile-revealed: 25 95% 53%;
-    --tile-glow: 25 95% 53%;
-    --neon-blue: 210 100% 50%;
-    --neon-pink: 320 100% 60%;
+    --tile-bg: 290 100% 96%;
+    --tile-revealed: 330 60% 64%;
+    --tile-glow: 330 60% 64%;
+    --neon-blue: 213 36% 60%;
+    --neon-pink: 295 78% 79%;
+
+    /* Palette colors */
+    --palette-1: 290 100% 83%;
+    --palette-2: 295 78% 79%;
+    --palette-3: 330 60% 64%;
+    --palette-4: 260 20% 57%;
+    --palette-5: 213 36% 60%;
 
     /* Gradients */
-    --gradient-gold: linear-gradient(135deg, hsl(25 95% 53%), hsl(35 100% 50%));
-    --gradient-dark: linear-gradient(180deg, hsl(210 40% 96%), hsl(210 40% 92%));
-    --gradient-tile: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 40% 96%));
+    --gradient-gold: linear-gradient(135deg, hsl(330 60% 64%), hsl(295 78% 79%));
+    --gradient-dark: linear-gradient(180deg, hsl(290 100% 96%), hsl(290 40% 92%));
+    --gradient-tile: linear-gradient(180deg, hsl(290 100% 99%), hsl(290 100% 96%));
 
     /* Shadows */
-    --shadow-glow: 0 0 30px hsl(25 95% 53% / 0.4);
-    --shadow-neon: 0 0 20px hsl(210 100% 50% / 0.4);
-    --shadow-tile: 0 4px 20px hsl(222 47% 11% / 0.1);
+    --shadow-glow: 0 0 30px hsl(330 60% 64% / 0.4);
+    --shadow-neon: 0 0 20px hsl(295 78% 79% / 0.4);
+    --shadow-tile: 0 4px 20px hsl(260 30% 20% / 0.1);
 
     /* Fonts */
     --font-display: 'Bebas Neue', sans-serif;
@@ -62,8 +69,8 @@
   }
 
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    --background: 260 30% 12%;
+    --foreground: 290 100% 96%;
   }
 }
 

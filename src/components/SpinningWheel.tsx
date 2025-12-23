@@ -7,18 +7,18 @@ interface SpinningWheelProps {
 }
 
 const SEGMENTS = [
-  { value: 100, color: "#FCF8E8" },
-  { value: 200, color: "#ECDFC8" },
-  { value: 300, color: "#ECB390" },
-  { value: 400, color: "#DF7861" },
-  { value: 500, color: "#FF370F" },
-  { value: 600, color: "#FCF8E8" },
-  { value: 800, color: "#ECDFC8" },
-  { value: 1000, color: "#ECB390" },
-  { value: 0, color: "#FF370F", label: "BANKRUPT" },
-  { value: 250, color: "#DF7861" },
-  { value: 350, color: "#FCF8E8" },
-  { value: 750, color: "#ECDFC8" },
+  { value: 100, color: "#efabff" },
+  { value: 200, color: "#eda2f2" },
+  { value: 300, color: "#dc6bad" },
+  { value: 400, color: "#8c7aa9" },
+  { value: 500, color: "#7192be" },
+  { value: 600, color: "#efabff" },
+  { value: 800, color: "#eda2f2" },
+  { value: 1000, color: "#dc6bad" },
+  { value: 0, color: "#8c7aa9", label: "BANKRUPT" },
+  { value: 250, color: "#7192be" },
+  { value: 350, color: "#efabff" },
+  { value: 750, color: "#eda2f2" },
 ];
 
 const SpinningWheel = ({ onSpinComplete, disabled }: SpinningWheelProps) => {
@@ -99,7 +99,7 @@ const SpinningWheel = ({ onSpinComplete, disabled }: SpinningWheelProps) => {
             const textRotation = (startAngle + endAngle) / 2 + 90;
             
             // Determine text color based on background brightness
-            const isDarkBg = segment.color === "#FF370F" || segment.color === "#DF7861";
+            const isDarkBg = segment.color === "#dc6bad" || segment.color === "#8c7aa9" || segment.color === "#7192be";
             
             return (
               <g key={index}>
